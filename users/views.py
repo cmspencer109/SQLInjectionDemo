@@ -3,29 +3,64 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from .forms import UserRegisterForm
 from bank.models import BankAccount
+from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login
-from django.contrib.auth.hashers import check_password
+from django.contrib.auth.hashers import make_password
 from django.db import connection
-from django.contrib.auth.hashers import get_password_hash_and_salt
 import hashlib
+from datetime import datetime
 
 
-def register(request):
-  if request.method == 'POST':
-    form = UserRegisterForm(request.POST)
-    if form.is_valid():
-      username = form.cleaned_data.get('username')
-      messages.success(request, f'Account created for {username}! You are now able to log in')
-      user = form.save() # takes care of creating the user, hashing the password, etc.
-      BankAccount.objects.create(owner=user) # creates a new bank account tied to the user
-      return redirect('/login/')
-  else:
-    form = UserRegisterForm()
+def custom_register(request):
+    if request.method == 'POST':
+      username = request.POST['username']
+      password = request.POST['password']
 
-  context = {
-    'form': form
-  }
-  return render(request, 'users/register.html', context)
+      # make sure a user does not already exist
+      with connection.cursor() as cursor:
+        cursor.execute(f"SELECT * FROM auth_user WHERE username='{username}'")
+        user_row = cursor.fetchone()
+        if user_row:
+          error = 'Username already exists. Please choose a different one.'
+          return render(request, 'users/register.html', {'error': error})
+      
+      # Hash the password
+      hashed_password = my_hasher(password)
+
+      current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+      
+      # Execute raw sql
+      with connection.cursor() as cursor:
+        cursor.execute(
+            "INSERT INTO auth_user (username, email, password, is_superuser, first_name, last_name, is_staff, is_active, date_joined) VALUES (%s, '', %s, 0, '', '', 0, 1, %s)",
+            [username, hashed_password, current_time]
+        )
+
+      # Get the newly created user from the database
+      # user = authenticate(username=username, password=password)
+      query = f"SELECT * FROM auth_user WHERE username='{username}'"
+
+      with connection.cursor() as cursor:
+          cursor.execute(query)
+          user_row = cursor.fetchone()
+      
+      # Log in the user and create a new bank account
+      if user_row is not None:
+        user_id = user_row[0]
+        user_obj = User.objects.get(pk=user_id) #User.objects.filter(pk=user_id)[0]
+        BankAccount.objects.create(owner=user_obj)
+        messages.success(request, f'Account created for {username}! You are now able to log in.')
+        # return redirect('/login/')
+        return redirect('home')
+      
+      # If the user wasn't created successfully, show an error message
+      else:
+        error = 'Error creating user. Please try again.'
+    
+    else:
+      error = None
+
+    return render(request, 'users/register.html', {'error': error})
 
 
 def custom_login(request):
@@ -33,18 +68,13 @@ def custom_login(request):
     # raw sql queries in order to introduce the sql injection bug
 
     if request.method == 'POST':
-
-        # Get the username and password from the form data
         username = request.POST['username']
         password = request.POST['password']
-        
-        # retrieve the password hash and find out the salt
-        stored_hash, salt = get_password_hash_and_salt(password)
-        # hash the entered password with the same salt
-        entered_hash = hashlib.pbkdf2_hmac('sha256', password.encode('utf-8'), salt, 100000)
+
+        hashed_password = my_hasher(password)
 
         # Raw SQL query. Here is the SQL injection vulnerability
-        query = f"SELECT * FROM auth_user WHERE username='{username}' AND password='{entered_hash}'"
+        query = f"SELECT * FROM auth_user WHERE username='{username}' AND password='{hashed_password}'"
         
         # Execute the query using Django's database connection
         with connection.cursor() as cursor:
@@ -53,7 +83,8 @@ def custom_login(request):
 
         # if the query returned a row then the user is there and we can authenticate them
         if user_row is not None:
-          user = authenticate(username=username, password=password)
+          user_id = user_row[0]
+          user = User.objects.get(pk=user_id) #User.objects.filter(pk=user_id)[0]
           if user is not None:
             login(request, user)
             return redirect('home')
@@ -68,18 +99,11 @@ def custom_login(request):
     return render(request, 'users/login.html', {'error': error})
 
 
-@login_required
-def profile(request):
-  return render(request, 'users/profile.html')
+def my_hasher(password):
+  return hashlib.sha256(password.encode('utf-8')).hexdigest()
 
 
-def authenticate(username, password):
-    with connection.cursor() as cursor:
-        cursor.execute("SELECT password FROM auth_user WHERE username = %s", [username])
-        row = cursor.fetchone()
-        if row is not None:
-            stored_hash, salt = get_password_hash_and_salt(row[0])
-            entered_hash = hashlib.pbkdf2_hmac('sha256', password.encode('utf-8'), salt, 100000)
-            if stored_hash == entered_hash:
-                return True
-    return False
+# @login_required
+# def profile(request):
+#   return render(request, 'users/profile.html')
+

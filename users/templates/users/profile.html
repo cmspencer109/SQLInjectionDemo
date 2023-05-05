@@ -1,12 +1,12 @@
 {% extends "bank/base.html" %}
 {% block content %}
 
-<div class="mb-3 d-flex align-items-start justify-content-between">
-  <h2>My Bank Account Information</h2>
+<div class="container p-5">
+  <h2>Bank Account Information for {{ user.username }}</h2>
 
+  <p>Account Number: {{ account.account_number }}</p>
+  <p>Routing Number: {{ account.routing_number }}</p>
+  <p>Current Balance: ${{ account.balance }}</p>
 </div>
-
-<p>{{ user.username }}</p>
-<p>{{ user.email }}</p>
 
 {% endblock content %}
