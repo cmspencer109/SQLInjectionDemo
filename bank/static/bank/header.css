@@ -1,0 +1,34 @@
+/* Header/navbar */
+.site-header {
+  background-color: #fedca9;
+}
+.site-header .navbar-brand {
+  font-size: 26px;
+  font-family: 'Patua One', sans-serif;
+  color: white;
+  /* letter-spacing: 1px; */
+}
+.site-header .navbar-brand:hover,
+.site-header .navbar-brand:active,
+.site-header .navbar-brand:focus {
+  color: white;
+}
+
+.site-header .navbar-nav .nav-link,
+.site-header .navbar-nav .nav-link:hover,
+.site-header .navbar-nav .nav-link:active,
+.site-header .navbar-nav .nav-link:focus {
+  color: white;
+  border-bottom: 2px solid transparent;
+}
+
+.site-header .navbar-nav .nav-link:hover,
+.site-header .navbar-nav .nav-link:active,
+.site-header .navbar-nav .nav-link:focus,
+.site-header .navbar-nav .nav-link.active {
+  border-color: black
+}
+
+.site-header .navbar-nav .nav-link.active {
+  font-weight: 500;
+}

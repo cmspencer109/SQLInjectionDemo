@@ -1,0 +1,12 @@
+{% extends "bank/base.html" %}
+{% block content %}
+
+<div class="mb-3 d-flex align-items-start justify-content-between">
+  <h2>My Bank Account Information</h2>
+
+</div>
+
+<p>{{ user.username }}</p>
+<p>{{ user.email }}</p>
+
+{% endblock content %}

@@ -1,0 +1,98 @@
+{% extends "bank/base.html" %}
+{% load static %}
+{% block content %}
+
+{% if user.is_authenticated %}
+
+<div class="container">
+  <div class="row mt-5">
+    <div class="col-md-6">
+      <h2>Bank Account Information</h2>
+      <p>Account Number: {{ account.account_number }}</p>
+      <p>Routing Number: {{ account.routing_number }}</p>
+      <p>Current Balance: ${{ account.current_balance }}</p>
+    </div>
+    <div class="col-md-6">
+      <h2>Deposit or Withdraw Money</h2>
+      <form method="post">
+        {% csrf_token %}
+        <div class="form-group">
+          <label for="amount">Amount:</label>
+          <input type="number" step="0.01" min="0.01" class="form-control" id="amount" name="amount" required>
+        </div>
+        <div class="form-group">
+          <label for="type">Transaction Type:</label>
+          <select class="form-control" id="type" name="type" required>
+            <option value="deposit">Deposit</option>
+            <option value="withdraw">Withdraw</option>
+          </select>
+        </div>
+        <button type="submit" class="btn btn-primary2 mt-2">Submit</button>
+      </form>
+    </div>
+  </div>
+
+  <hr class="my-5">
+
+  <div class="pb-5">
+    <h2>Transaction History</h2>
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Amount</th>
+          <th>Type</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for transaction in transactions %}
+        <tr>
+          <td>{{ transaction.transaction_date }}</td>
+          <td>${{ transaction.amount }}</td>
+          <td>{{ transaction.get_type_display }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% else %}
+
+<div class="hero-image pt-3 pb-0">
+  <div class="container">
+    <div class="row">
+      <div class="col-md-6">
+        <div class="hero-text p-5">
+          <h1>Welcome to InsecureBank</h1>
+          <p>The most insecure bank in the world! You don't need to worry about security, because we don't either!</p>
+          <a class="btn btn-primary btn-lg me-2" href="{% url 'register' %}" role="button">Join</a>
+          <a class="btn btn-secondary btn-lg" href="{% url 'login' %}" role="button">Log in</a>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <img src="../static/bank/images/card.png" class="w-100 px-5" alt="Bank Card">
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+  <div class="row p-5">
+    <div class="col-md-8 mx-auto">
+      <h2>About InsecureBank</h2>
+      <p>InsecureBank is a web application created using Django, designed to showcase the potential danger of SQL Injection attacks. An application becomes vulnerable to such attacks when it fails to properly sanitize submitted data through its forms. Sanitization ensures that only the expected data types and values are allowed into the system, but without it, the application is unable to differentiate between valid and malicious data.</p>
+      <h2 class="mt-5">What is a SQL Injection Attack?</h2>
+      <p>SQL Injection is a type of security attack where an attacker injects malicious SQL code into the application, often via input fields. This can trick the application into executing unintended SQL commands and compromising the database, leading to data loss, data breaches, and even complete takeover of the system.</p>
+      <h2 class="mt-5">How Does a SQL Injection attack work?</h2>
+      <p>The attacker can use SQL Injection to extract sensitive data such as usernames, passwords, and credit card information or modify the database's contents, changing records, and inserting new data. This attack can occur when developers do not properly validate user inputs and trust that the data sent to the server is correct.</p>
+      <h2 class="mt-5">Conclusion</h2>
+      <p>Always sanitize your data! By ensuring all data inputs are properly sanitized before they are processed by the application, we can guard against this type of vulnerability.</p>
+    </div>
+  <div>
+</div>
+
+
+{% endif %}
+
+{% endblock content %}
