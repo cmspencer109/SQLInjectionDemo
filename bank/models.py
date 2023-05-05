@@ -7,7 +7,7 @@ class BankAccount(models.Model):
   owner = models.ForeignKey(User, on_delete=models.CASCADE)
   account_number = models.BigIntegerField(unique=True)
   routing_number = models.BigIntegerField(unique=True)
-  balance = models.DecimalField(max_digits=10, decimal_places=2)
+  balance = models.DecimalField(max_digits=10, decimal_places=2, default=0)
 
   def save(self, *args, **kwargs):
     if not self.account_number:
