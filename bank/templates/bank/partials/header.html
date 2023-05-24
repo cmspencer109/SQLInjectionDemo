@@ -1,26 +1,27 @@
 <header class="site-header">
   <nav class="navbar navbar-expand-md navbar-light bg-blue py-3">
     <div class="container">
-      <a class="navbar-brand mr-4 text-black" href="{% url 'home' %}"><i class="fas fa-graduation-cap"></i> InsecureBank</a>
+      <a class="navbar-brand mr-4 text-green" href="{% url 'home' %}"><i class="fa-solid fa-building-columns"></i> InsecureBank</a>
       <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarToggle" aria-controls="navbarToggle" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
       </button>
       <div class="collapse navbar-collapse justify-content-between" id="navbarToggle">
         <div class="navbar-nav mr-auto">
           {% if user.is_authenticated %}
-            <!-- <a class="nav-item nav-link text-black" href="{% url 'home' %}">My Account</a> -->
-            <span class="d-inline ms-3 text-black">Hello, {{ user.username }}</span>
+            <a class="nav-item nav-link text-green" href="{% url 'home' %}">My Account</a>
+            <a class="nav-item nav-link text-green" href="{% url 'send' %}">Send Money</a>
           {% endif %}
           <!-- <a class="nav-item nav-link" href="">Browse</a> -->
         </div>
         <!-- Navbar Right Side -->
-        <div class="navbar-nav">
+        <div class="navbar-nav d-flex align-items-center">
           
           {% if user.is_authenticated %}
-            <a class="nav-item nav-link text-black" href="{% url 'logout' %}">Logout <i class="fas fa-sign-out-alt"></i></a>
+            <p class="m-0 pe-3">Logged in as <b>{{ user.username }}</b></p>
+            <a class="nav-item nav-link text-green" href="{% url 'logout' %}">Logout <i class="fas fa-sign-out-alt"></i></a>
           {% else %}
-          <a class="nav-item nav-link text-black ms-3 d-block" href="{% url 'register' %}">Join</a>
-          <a class="nav-item nav-link text-black" href="{% url 'login' %}">Login</a>
+          <a class="nav-item nav-link text-green ms-3 d-block" href="{% url 'register' %}">Join</a>
+          <a class="nav-item nav-link text-green" href="{% url 'login' %}">Login</a>
           {% endif %}
         </div>
       </div>

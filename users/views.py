@@ -9,6 +9,7 @@ from django.contrib.auth.hashers import make_password
 from django.db import connection
 import hashlib
 from datetime import datetime
+import sqlite3
 
 
 def custom_register(request):
@@ -50,8 +51,7 @@ def custom_register(request):
         user_obj = User.objects.get(pk=user_id) #User.objects.filter(pk=user_id)[0]
         BankAccount.objects.create(owner=user_obj)
         messages.success(request, f'Account created for {username}! You are now able to log in.')
-        # return redirect('/login/')
-        return redirect('home')
+        return redirect('login')
       
       # If the user wasn't created successfully, show an error message
       else:
@@ -70,15 +70,26 @@ def custom_login(request):
     if request.method == 'POST':
         username = request.POST['username']
         password = request.POST['password']
+        # username += "	' or '1'='1"
+        print(username, password)
 
         hashed_password = my_hasher(password)
 
         # Raw SQL query. Here is the SQL injection vulnerability
-        query = f"SELECT * FROM auth_user WHERE username='{username}' AND password='{hashed_password}'"
+        query = f"""
+          SELECT * FROM auth_user WHERE username='{username}' AND password='{hashed_password}'
+        """
+
+        print("This is the query that may contain SQL injection")
+        print(query)
         
         # Execute the query using Django's database connection
+        con = sqlite3.connect('db.sqlite3')
+        con.executescript(query)
+        
+        q = f"SELECT * FROM auth_user WHERE username='{username}' AND password='{hashed_password}'"
         with connection.cursor() as cursor:
-          cursor.execute(query)
+          cursor.execute(q)
           user_row = cursor.fetchone()
 
         # if the query returned a row then the user is there and we can authenticate them

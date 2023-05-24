@@ -18,10 +18,11 @@ body {
 }
 
 .hero-image {
-  background-image: url('images/hero.png');
+  /* background-image: url('images/hero.png'); */
   background-position: center;
   background-repeat: no-repeat;
   background-size: cover;
+  background-color: #0f131a;
 }
 
 .hero-text {
